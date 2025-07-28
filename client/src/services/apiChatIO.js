@@ -41,7 +41,7 @@ export const searchUsers = async (username) => {
 };
 
 export const joinSocket = async (user) => {
-  const socket = io("http://localhost:3000", {
+  const socket = io(`${API}`, {
     query: { userId: user._id },
   });
 
