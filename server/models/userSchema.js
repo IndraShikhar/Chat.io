@@ -44,6 +44,10 @@ const userSchema = new mongoose.Schema({
     //   lastMessageAt: {
     //     type: Date,
     //   },
+    //   newMessages:{
+    //     type: Number,
+    //     default: 0
+    //   }
     // },
     default: {},
     select: false,

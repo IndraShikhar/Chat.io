@@ -4,7 +4,7 @@ import { useState } from "react";
 import { sendMessage } from "../services/apiChatIO";
 import { useSelector } from "react-redux";
 import toast from "react-hot-toast";
-import { getSocket } from "../features/socket";
+import { getSocket } from "../services/socket";
 
 function MessageInput() {
   const { user } = useSelector((state) => state.user);
@@ -24,6 +24,7 @@ function MessageInput() {
       socket.emit("sendMessage", {
         roomId: user.chats[chatUser._id].id,
         user: chatUser,
+        messageId: data.data.id,
       });
       toast.success(data.message);
       setMessage("");

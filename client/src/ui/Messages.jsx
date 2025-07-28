@@ -1,13 +1,19 @@
 import { useSelector } from "react-redux";
 import Message from "./Message";
+import { useEffect, useRef } from "react";
 
 function Messages() {
   const { user } = useSelector((state) => state.user);
   const messages = useSelector((state) => state.currentChat.messages);
+  const bottomRef = useRef(null);
   console.log(messages);
 
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: "instant" });
+  }, [messages]);
+
   return (
-    <div className="py-4 px-8 flex flex-col gap-4 flex-1 bg-amber-300 overflow-auto">
+    <div className="mt-4 pb-4 px-8 flex flex-col gap-1 flex-1 bg-amber-300 overflow-auto">
       {messages &&
         messages.map((message) => (
           <Message
@@ -19,6 +25,7 @@ function Messages() {
             {message.message}
           </Message>
         ))}
+      <span ref={bottomRef} />
     </div>
   );
 

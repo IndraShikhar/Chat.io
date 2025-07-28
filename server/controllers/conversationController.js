@@ -44,6 +44,7 @@ const conversationController = {
         id: convId,
         lastMessage: "",
         lastMessageAt: Date.now(),
+        newMessages: 0,
       };
       //   }
 
@@ -109,35 +110,42 @@ const conversationController = {
       user.chats[req.params.chatId].id
     );
 
-    await conversation.create({
+    // Adding message to conversation
+    const { id } = await conversation.create({
       sender: user.id,
       reciver: req.params.chatId,
       message: req.body.message,
     });
 
-    await User.updateOne(
-      { _id: req.params.chatId },
-      {
-        $set: {
-          [`chats.${user.id}.lastMessageAt`]: Date.now(),
-          [`chats.${user.id}.lastMessage`]: req.body.message,
-        },
-      }
-    );
+    //Updating both users last messages
+    {
+      await User.updateOne(
+        { _id: req.params.chatId },
+        {
+          $set: {
+            [`chats.${user.id}.lastMessageAt`]: Date.now(),
+            [`chats.${user.id}.lastMessage`]: req.body.message,
+          },
+        }
+      );
 
-    await User.updateOne(
-      { _id: user.id },
-      {
-        $set: {
-          [`chats.${req.params.chatId}.lastMessageAt`]: Date.now(),
-          [`chats.${req.params.chatId}.lastMessage`]: req.body.message,
-        },
-      }
-    );
+      await User.updateOne(
+        { _id: user.id },
+        {
+          $set: {
+            [`chats.${req.params.chatId}.lastMessageAt`]: Date.now(),
+            [`chats.${req.params.chatId}.lastMessage`]: req.body.message,
+          },
+        }
+      );
+    }
 
     res.status(200).json({
       status: "success",
       message: "Message sent successfully",
+      data: {
+        id,
+      },
     });
   }),
 };

@@ -1,11 +1,10 @@
 import { login, updateChat } from "./userSlice";
 import { createAsyncThunk } from "@reduxjs/toolkit";
-import { connectSocket, getSocket, joinRoom } from "./socket";
+import { connectSocket, getSocket, joinRoom } from "../services/socket";
+import { logout } from "./userSlice";
 import { addChat } from "./chatsSlice";
 import { setCurrentChat } from "./currentChatSlice";
 import { getMessages } from "../services/apiChatIO";
-
-const socket = getSocket();
 
 export const loginAndJoinSocket = createAsyncThunk(
   "app/loginAndJoinSocket",
@@ -15,11 +14,11 @@ export const loginAndJoinSocket = createAsyncThunk(
   }
 );
 
-export const logout = createAsyncThunk(
+export const logoutAndLeaveSocket = createAsyncThunk(
   "app/logoutAndLeaveSocket",
   async (_, { dispatch }) => {
     dispatch(logout());
-    socket.disconnect();
+    getSocket().disconnect();
   }
 );
 
@@ -27,12 +26,18 @@ export const onAddChat = createAsyncThunk(
   "app/onAddChat",
   async ({ chatUser, conversationId }, { dispatch }) => {
     // dispatch(login(user));
+    const chat = {
+      chatUser,
+      lastMessage: "",
+      lastMessageAt: Date.now(),
+      newMessages: 0,
+    };
     dispatch(updateChat({ chatUser, conversationId }));
-    dispatch(addChat(chatUser));
+    dispatch(addChat(chat));
     dispatch(
-      setCurrentChat({
-        user: { chatUser, lastMessage: "", lastMessageAt: Date.now() },
-        messages: [],
+      onSetCurrentChat({
+        user: { chats: { [chatUser._id]: { id: conversationId } } },
+        chatUser,
       })
     );
   }
@@ -40,8 +45,13 @@ export const onAddChat = createAsyncThunk(
 
 export const onSetCurrentChat = createAsyncThunk(
   "app/onSetCurrentChat",
-  async ({ user, chatUser }, { dispatch }) => {
-    joinRoom(user.chats[chatUser._id].id);
+  async ({ user, chatUser }, { dispatch, getState }) => {
+    // Ensure user.chats is correctly accessed, especially after a new chat is added
+    const currentUser = getState().user.user;
+    const roomId =
+      currentUser.chats[chatUser._id]?.id || user.chats[chatUser._id]?.id;
+
+    joinRoom(roomId);
     const data = await getMessages({ chatId: chatUser._id });
     dispatch(setCurrentChat({ user: chatUser, messages: data.messages }));
   }
