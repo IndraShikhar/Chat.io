@@ -8,12 +8,35 @@ import conversationRouter from "./routes/conversationRouter.js";
 
 const app = express();
 
-app.use(
-  cors({
-    origin: "http://localhost:5173",
-    credentials: true,
-  })
-);
+const allowedOrigins = [
+  "https://chat-io-git-main-indrashikhars-projects.vercel.app/",
+  "https://chat-io-ten.vercel.app/",
+  "https://chat-io-indrashikhars-projects.vercel.app/",
+  "http://localhost:5173", // For local development
+];
+
+const corsOptions = {
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    } else {
+      return callback(new Error(`CORS Error: ${origin} not allowed`));
+    }
+  },
+  credentials: true, // If you want to allow cookies or HTTP auth
+};
+
+app.use(cors(corsOptions));
+
+// app.use(
+//   cors({
+//     origin: "http://localhost:5173",
+//     credentials: true,
+//   })
+// );
 app.use(express.json());
 
 app.use((req, res, next) => {
