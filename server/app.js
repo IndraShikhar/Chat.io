@@ -9,9 +9,7 @@ import conversationRouter from "./routes/conversationRouter.js";
 const app = express();
 
 const allowedOrigins = [
-  "https://chat-io-git-main-indrashikhars-projects.vercel.app/",
-  "https://chat-io-ten.vercel.app/",
-  "https://chat-io-indrashikhars-projects.vercel.app/",
+  "https://chat-io-ten.vercel.app",
   "http://localhost:5173", // For local development
 ];
 
